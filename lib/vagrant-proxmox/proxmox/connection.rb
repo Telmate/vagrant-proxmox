@@ -37,6 +37,7 @@ module VagrantPlugins
 				@task_timeout = opts[:task_timeout] || 60
 				@task_status_check_interval = opts[:task_status_check_interval] || 2
 				@imgcopy_timeout = opts[:imgcopy_timeout] || 120
+        @vm_info_cache = {}
 			end
 
 			def login username: required('username'), password: required('password')
@@ -134,6 +135,12 @@ module VagrantPlugins
 				wait_for_completion task_response: response, timeout_message: 'vagrant_proxmox.errors.start_vm_timeout'
 			end
 
+      def monitor_cmd vm_id, cmd
+        vm_info = get_vm_info vm_id
+        response = post "/nodes/#{vm_info[:node]}/qemu/#{vm_id}/monitor", { command: cmd }
+        # TODO: response?
+      end
+
 			def stop_vm vm_id
 				vm_info = get_vm_info vm_id
 				response = post "/nodes/#{vm_info[:node]}/#{vm_info[:type]}/#{vm_id}/status/stop", nil
@@ -195,7 +202,7 @@ module VagrantPlugins
 			private
 			def get_vm_info vm_id
 				response = get '/cluster/resources?type=vm'
-				response[:data]
+				@vm_info_cache[vm_id] ||= response[:data]
 					.select { |m| m[:id] =~ /^[a-z]*\/#{vm_id}$/ }
 					.map { |m| {id: vm_id, type: /^(.*)\/(.*)$/.match(m[:id])[1], node: m[:node]} }
 					.first
@@ -215,8 +222,9 @@ module VagrantPlugins
 					JSON.parse response.to_s, symbolize_names: true
 				rescue RestClient::NotImplemented
 					raise ApiError::NotImplemented
-				rescue RestClient::InternalServerError
-					raise ApiError::ServerError
+				rescue RestClient::InternalServerError => se
+          $stderr.puts ">>>>>>>" + se.inspect
+					raise ApiError::ServerError, se.message
 				rescue RestClient::Unauthorized
 					raise ApiError::UnauthorizedError
 				rescue => x
@@ -249,8 +257,9 @@ module VagrantPlugins
 					raise ApiError::UnauthorizedError
 				rescue RestClient::NotImplemented
 					raise ApiError::NotImplemented
-				rescue RestClient::InternalServerError
-					raise ApiError::ServerError
+				rescue RestClient::InternalServerError  => se
+          $stderr.puts ">>>>>>>" + se.inspect
+					raise ApiError::ServerError, se.message
 				rescue => x
 					raise ApiError::ConnectionError, x.message
 				end

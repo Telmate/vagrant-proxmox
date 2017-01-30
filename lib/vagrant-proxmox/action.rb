@@ -63,7 +63,7 @@ module VagrantPlugins
 									b1.use Call, UploadIsoFile do |env2, b2|
 										if env2[:result] == :ok
 											b2.use CreateVm
-											b2.use StartVm
+											b2.use UsernetForwardssh
 											b2.use SyncFolders
 										elsif env2[:result] == :file_not_found
 											b2.use MessageFileNotFound
@@ -234,6 +234,7 @@ module VagrantPlugins
 		autoload :SyncFolders, action_root.join('sync_folders')
 		autoload :UploadTemplateFile, action_root.join('upload_template_file')
 		autoload :UploadIsoFile, action_root.join('upload_iso_file')
+		autoload :UsernetForwardssh, action_root.join('usernet_forwardssh')
 
 	end
 end

@@ -19,7 +19,8 @@ module VagrantPlugins
 
 					begin
 						vm_id = env[:machine].id.split("/").last
-						node_ip = env[:proxmox_connection].get_node_ip(node, 'vmbr0')
+						node_ip = config.ssh_forwarding_ip ||
+							env[:proxmox_connection].get_node_ip(node, config.qemu_bridge)
 						env[:machine].config.vm.networks.each do |type, options|
 							next if type != :forwarded_port
 							if options[:id] == "ssh"

@@ -88,6 +88,11 @@ module VagrantPlugins
 			# @return [Integer, Proc]
 			attr_accessor :ssh_status_check_interval
 
+			# The Proxmox defaults node_ip, but look up take extra perms
+			#
+			# @return [String]
+			attr_accessor :ssh_forwarding_ip
+
 			# The maximum timeout for a proxmox server task if it's an upload (in seconds)
 			#
 			# @return [Integer]
@@ -151,6 +156,12 @@ module VagrantPlugins
 			# @return [String]
 			attr_accessor :qemu_bridge
 
+
+			# The qemu network bridge vlan
+			#
+			# @return [Integer]
+			attr_accessor :qemu_vlan_tag
+
 			def initialize
 				@endpoint = UNSET_VALUE
 				@selected_node = UNSET_VALUE
@@ -200,7 +211,7 @@ module VagrantPlugins
 				@qemu_iso = nil if @qemu_iso == UNSET_VALUE
 				@qemu_disk_size = nil if @qemu_disk_size == UNSET_VALUE
 				@qemu_disk_size = convert_disk_size_to_gigabyte @qemu_disk_size if @qemu_disk_size
-                @vm_disk_size = convert_disk_size_to_gigabyte @vm_disk_size if @vm_disk_size
+				@vm_disk_size = convert_disk_size_to_gigabyte @vm_disk_size if @vm_disk_size
 			end
 
 			def validate machine

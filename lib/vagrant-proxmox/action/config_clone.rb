@@ -22,7 +22,8 @@ module VagrantPlugins
 
 					begin
 						vm_id = env[:machine].id.split("/").last
-						@node_ip = connection(env).get_node_ip(node, 'vmbr0') if config.vm_type == :qemu
+						@node_ip = config.ssh_forwarding_ip ||
+												connection(env).get_node_ip(node, config.qemu_bridge) if config.vm_type == :qemu
 						@guest_port = sprintf("22%03d", vm_id.to_i).to_s
 					rescue StandardError => e
 						raise VagrantPlugins::Proxmox::Errors::VMConfigError, proxmox_exit_status: e.message

@@ -92,9 +92,9 @@ Vagrant.configure('2') do |config|
         proxmox.vm_memory = 512
     end
 
-    config.vm.define :box, primary: true do |box|
+    config.vm.define 'box-name', primary: true do |box|
         box.vm.box = 'dummy'
-        box.vm.network :public_network, ip: '192.168.0.1', macaddress: 'ff:aa:cc:dd:bb:ee'
+        box.vm.network :forwarded_port, id: 'ssh', guest: 22, host: 22
     end
 
 end
@@ -136,7 +136,10 @@ Finally run `vagrant up --provider=proxmox` to create and start the new OpenVZ c
 * `qemu_sockets` The number of CPU sockets available to the VM
 * `qemu_nic_model` which model of network interface card to use, default 'e1000'
 * `qemu_bridge` connect automatically to this bridge, default 'vmbr0'
-* `selected_node` If specified, only this specific node is used to create machines 
+* `selected_node` If specified, only this specific node is used to create machines
+* `qemu_vlan_tag` Optional, vlan tag for eth0
+* `ssh_forwarding_ip` Optional, defaults to Proxmox bridge IP, but IP look up requires system permissions
+
 
 ## Build the plugin
 

@@ -39,15 +39,20 @@ module VagrantPlugins
 				def create_params_qemu(config, env, vm_id)
 					network = "#{config.qemu_nic_model},bridge=#{config.qemu_bridge}"
 					network = "#{config.qemu_nic_model}=#{get_machine_macaddress(env)},bridge=#{config.qemu_bridge}" if get_machine_macaddress(env)
+					network += ",tag=#{config.qemu_vlan_tag}" if config.qemu_vlan_tag
+
 					{vmid: vm_id,
 					 name: env[:machine].config.vm.hostname || env[:machine].name.to_s,
 					 ostype: config.qemu_os,
 					 ide2: "#{config.qemu_iso},media=cdrom",
-					 sata0: "#{config.qemu_storage}:#{config.qemu_disk_size},format=qcow2",
+					 #sata0: "#{config.qemu_storage}:#{config.qemu_disk_size},format=qcow2",
+					 virtio0: "#{config.qemu_storage}:#{config.qemu_disk_size}",
 					 sockets: config.qemu_sockets,
 					 cores: config.qemu_cores,
+					 cpu: 'host',
 					 memory: config.vm_memory,
 					 net0: network,
+					 pool: 'default',
 					 description: "#{config.vm_name_prefix}#{env[:machine].name}"}
 				end
 
